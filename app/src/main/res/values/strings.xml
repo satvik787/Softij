@@ -1,0 +1,16 @@
+<resources>
+    <string name="app_name">Softij</string>
+    <string name="desc_search_btn">Search Button</string>
+    <string name="desc_account_image">User Image</string>
+    <string name="desc_product_image">product image</string>
+    <string name="text_hello">Hello %1$s</string>
+    <string name="search">Search</string>
+    <string name="desc_open_navigation_drawer">Open Navigation Menu</string>
+    <string name="desc_close_navigation_drawer">Close Navigation Menu</string>
+    <string name="title_my_acc">My Account</string>
+    <string name="title_my_wishlist">My WishList</string>
+    <string name="title_my_order">My Orders</string>
+    <string name="btn_buy_now">Buy Now</string>
+    <string name="btn_add_cart">Add To Cart</string>
+    <string name="text_product_price">\u20B9 %1$s</string>
+</resources>

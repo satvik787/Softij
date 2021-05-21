@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <group
+        android:id="@+id/user_group"
+        android:checkableBehavior="single">
+        <item
+            android:id="@+id/my_account"
+            android:title="@string/title_my_acc"
+            android:icon="@mipmap/ic_account"/>
+        <item
+            android:id="@+id/my_order"
+            android:title="@string/title_my_order"
+            android:icon="@mipmap/ic_order"/>
+        <item
+            android:id="@+id/my_wishlist"
+            android:title="@string/title_my_wishlist"
+            android:icon="@mipmap/ic_wishlist"/>
+    </group>
+</menu>
