@@ -13,4 +13,6 @@
     <string name="btn_buy_now">Buy Now</string>
     <string name="btn_add_cart">Add To Cart</string>
     <string name="text_product_price">\u20B9 %1$s</string>
+    <string name="title_home">Home</string>
+    <string name="title_cart">Cart</string>
 </resources>

@@ -9,4 +9,7 @@ interface Api {
     fun getProducts(
         @Query("limit") limit:Int,
         @Query("start") start:Int):Call<String>
+
+    @GET(Address.wishList)
+    fun getWishlist(@Query("customerId") id:Int):Call<String>
 }

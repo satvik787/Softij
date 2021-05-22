@@ -24,7 +24,7 @@ class SoftijRepository private constructor()
     private val api = retrofit.create(Api::class.java)
 
     companion object{
-        var obj:SoftijRepository? = null
+        private var obj:SoftijRepository? = null
         fun init(){
             if(obj == null) obj = SoftijRepository()
         }
@@ -41,7 +41,7 @@ class SoftijRepository private constructor()
         val mutableLiveData = MutableLiveData<Res<MutableList<Product>>>()
 
         productCall.enqueue(object:Callback<String>{
-            override fun onResponse(call: Call<String>, p1: Response<String>) {
+            override fun onResponse(p0: Call<String>, p1: Response<String>) {
                 p1.body()?.let{ json ->
                     mutableLiveData.value = Product.getProducts(json)
                 }?:run{
@@ -59,6 +59,34 @@ class SoftijRepository private constructor()
                     -1,
                     0)
             }
+        })
+        return mutableLiveData
+    }
+
+    fun getWishList(id:Int):LiveData<Res<MutableList<Product>>>{
+        val wishListCall: Call<String> = api.getWishlist(id)
+        val mutableLiveData = MutableLiveData<Res<MutableList<Product>>>()
+        wishListCall.enqueue(object:Callback<String>{
+            override fun onResponse(p0: Call<String>, p1: Response<String>) {
+                p1.body()?.let { json ->
+                    mutableLiveData.value = Product.getProducts(json)
+                }?: run {
+                    mutableLiveData.value = Res(
+                        "Response Body Empty",
+                        -1,
+                        0
+                    )
+                }
+            }
+
+            override fun onFailure(p0: Call<String>, p1: Throwable) {
+                mutableLiveData.value = Res(
+                    "Http Request Failed ${p1.message}",
+                    -1,
+                    0
+                )
+            }
+
         })
         return mutableLiveData
     }

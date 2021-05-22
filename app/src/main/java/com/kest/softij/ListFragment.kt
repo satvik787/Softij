@@ -8,32 +8,52 @@ import android.view.ViewGroup
 import android.widget.Button
 import android.widget.ImageView
 import android.widget.TextView
+import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.kest.softij.api.model.Product
 
 
-class HomeFragment : Fragment() {
+class ListFragment : Fragment() {
 
     private lateinit var recyclerView: RecyclerView
+    private val viewModel:ListFragmentViewModel by lazy{
+        ViewModelProvider(this).get(ListFragmentViewModel::class.java)
+    }
+    companion object{
+        const val LIST_PRODUCTS = 0
+        const val LIST_WISHLIST = 1
+        private const val KEY_LIST = "KEY_LIST"
+        fun init(type:Int):ListFragment{
+            return ListFragment().apply {
+                val bundle = Bundle()
+                bundle.putInt(KEY_LIST,type)
+                arguments = bundle
+            }
+        }
+    }
 
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        arguments?.let {
+            viewModel.init(it.getInt(KEY_LIST))
+        }
+    }
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
-        return inflater.inflate(R.layout.fragment_home, container, false)
+        return inflater.inflate(R.layout.fragment_list, container, false)
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         recyclerView = view as RecyclerView
         recyclerView.layoutManager = LinearLayoutManager(context)
-        val data = SoftijRepository.getRepo().getProducts(3647,100)
-        data.observe(viewLifecycleOwner,{
+        viewModel.products.observe(viewLifecycleOwner,{
             it?.let { res ->
                 res.data?.let { list ->
-                    println("LIST $list")
                     recyclerView.adapter = SearchAdapter(list)
                 }
             }
@@ -43,8 +63,8 @@ class HomeFragment : Fragment() {
     private class SearchAdapter(private var list:MutableList<Product>)
         :RecyclerView.Adapter<ProductViewHolder>(){
         override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ProductViewHolder {
-            val view:View = LayoutInflater.from(parent.context).inflate(R.layout.item_product,parent,false);
-            return ProductViewHolder(view);
+            val view:View = LayoutInflater.from(parent.context).inflate(R.layout.item_product,parent,false)
+            return ProductViewHolder(view)
         }
 
         override fun onBindViewHolder(holder: ProductViewHolder, position: Int) {
