@@ -8,6 +8,7 @@
     <string name="desc_open_navigation_drawer">Open Navigation Menu</string>
     <string name="desc_close_navigation_drawer">Close Navigation Menu</string>
     <string name="title_my_acc">My Account</string>
+    <string name="btn_wishlist">WishList</string>
     <string name="title_my_wishlist">My WishList</string>
     <string name="title_my_order">My Orders</string>
     <string name="btn_buy_now">Buy Now</string>
@@ -15,4 +16,6 @@
     <string name="text_product_price">\u20B9 %1$s</string>
     <string name="title_home">Home</string>
     <string name="title_cart">Cart</string>
+    <string name="title_product">Product</string>
+    <string name="text_desc">Description</string>
 </resources>

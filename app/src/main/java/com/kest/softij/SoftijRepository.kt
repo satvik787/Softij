@@ -6,6 +6,7 @@ import com.kest.softij.api.Address
 import com.kest.softij.api.Api
 import com.kest.softij.api.model.Product
 import com.kest.softij.api.model.Res
+import org.json.JSONObject
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
@@ -89,5 +90,70 @@ class SoftijRepository private constructor()
 
         })
         return mutableLiveData
+    }
+
+    fun postWishList(customerId:Int,productId:Int):LiveData<Res<Unit>>{
+        val postWishlistCall = api.postWishlist(customerId,productId)
+        val livedata = MutableLiveData<Res<Unit>>()
+        postWishlistCall.enqueue(object :Callback<String>{
+            override fun onResponse(p0: Call<String>, p1: Response<String>) {
+                p1.body()?.let { json ->
+                    val obj = JSONObject(json)
+                    livedata.value = Res(
+                        obj.getString("Msg"),
+                        obj.getInt("code"),
+                        obj.getInt("numRows")
+                    )
+                }?: run {
+                    livedata.value = Res(
+                        "Response Body Empty",
+                        -1,
+                        0
+                    )
+                }
+            }
+
+            override fun onFailure(p0: Call<String>, p1: Throwable) {
+                livedata.value = Res(
+                    "Http Request Failed ${p1.message}",
+                    -1,
+                    0
+                )
+            }
+        })
+        return livedata
+    }
+
+    fun inWishlist(customerId:Int,productId:Int):LiveData<Res<Unit>>{
+        val inWishlistCall = api.inWishlist(customerId,productId)
+        val livedata = MutableLiveData<Res<Unit>>()
+        inWishlistCall.enqueue(object :Callback<String>{
+            override fun onResponse(p0: Call<String>, p1: Response<String>) {
+                p1.body()?.let { json ->
+                    println("JSON $json")
+                    val obj = JSONObject(json)
+                    livedata.value = Res(
+                        obj.getString("Msg"),
+                        obj.getInt("code"),
+                        obj.getInt("numRows")
+                    )
+                }?: run {
+                    livedata.value = Res(
+                        "Response Body Empty",
+                        -1,
+                        0
+                    )
+                }
+            }
+
+            override fun onFailure(p0: Call<String>, p1: Throwable) {
+                livedata.value = Res(
+                    "Http Request Failed ${p1.message}",
+                    -1,
+                    0
+                )
+            }
+        })
+        return livedata
     }
 }

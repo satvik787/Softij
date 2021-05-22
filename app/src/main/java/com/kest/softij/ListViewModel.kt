@@ -5,7 +5,7 @@ import androidx.lifecycle.ViewModel
 import com.kest.softij.api.model.Product
 import com.kest.softij.api.model.Res
 
-class ListFragmentViewModel:ViewModel() {
+class ListViewModel:ViewModel() {
     lateinit var products:LiveData<Res<MutableList<Product>>>
     private val repo = SoftijRepository.getRepo()
 

@@ -1,9 +1,9 @@
 package com.kest.softij.api.model
 
 import org.json.JSONObject
+import java.io.Serializable
 
-data class Product
-    (
+data class Product(
     val productId:Int,
     val name:String,
     val description:String,
@@ -13,7 +13,7 @@ data class Product
     val dateAdded:String,
     val imageLink:String,
     var viewed:Int
-    )
+    ):Serializable
 {
         companion object{
 

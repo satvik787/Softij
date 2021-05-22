@@ -11,13 +11,14 @@ import androidx.drawerlayout.widget.DrawerLayout
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import com.google.android.material.navigation.NavigationView
+import com.kest.softij.api.model.Product
 
-class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelectedListener {
+class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelectedListener,ProductFragment.ToProductFragment {
     private lateinit var actionBarDrawerToggle:ActionBarDrawerToggle
     private lateinit var drawerLayout:DrawerLayout
 
-    private val viewModel:MainActivityViewModel by lazy{
-        ViewModelProvider(this).get(MainActivityViewModel::class.java)
+    private val viewModel:MainViewModel by lazy{
+        ViewModelProvider(this).get(MainViewModel::class.java)
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -84,6 +85,14 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         return true
     }
 
+    override fun onBackPressed() {
+        if(drawerLayout.isDrawerOpen(GravityCompat.START)){
+            drawerLayout.closeDrawer(GravityCompat.START)
+        }else{
+            super.onBackPressed()
+        }
+    }
+
     private fun replaceFragment(fragment: Fragment,id:Int) {
         supportFragmentManager
             .beginTransaction()
@@ -97,12 +106,8 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         supportActionBar?.title = viewModel.title
     }
 
-    override fun onBackPressed() {
-        if(drawerLayout.isDrawerOpen(GravityCompat.START)){
-            drawerLayout.closeDrawer(GravityCompat.START)
-        }else{
-            super.onBackPressed()
-        }
+    override fun navigate(product: Product) {
+        replaceFragment(ProductFragment.init(product),R.string.title_product)
     }
 
 }
