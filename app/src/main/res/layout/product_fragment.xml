@@ -42,7 +42,7 @@
         app:layout_constraintStart_toEndOf="@+id/product_add_cart" />
 
     <TextView
-        android:id="@+id/product_name"
+        android:id="@+id/order_name"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="16dp"
@@ -57,7 +57,7 @@
         android:layout_marginStart="8dp"
         android:layout_marginTop="24dp"
         android:textSize="14sp"
-        app:layout_constraintStart_toEndOf="@+id/product_name"
+        app:layout_constraintStart_toEndOf="@+id/order_name"
         app:layout_constraintTop_toBottomOf="@+id/img_product" />
 
     <TextView
@@ -69,7 +69,7 @@
         android:padding="10dp"
         android:textSize="16sp"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/product_name" />
+        app:layout_constraintTop_toBottomOf="@+id/order_name" />
 
     <TextView
         android:id="@+id/description"
@@ -107,6 +107,22 @@
         android:text="@string/btn_wishlist"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/product_model" />
+
+    <TextView
+        android:id="@+id/product_stock"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/product_desc" />
+
+    <TextView
+        android:id="@+id/product_date"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/product_desc" />
 
 
 </androidx.constraintlayout.widget.ConstraintLayout>

@@ -16,7 +16,13 @@ interface Api {
     fun inWishlist(@Query("customerId") customerId: Int,
                    @Query("productId") productId: Int):Call<String>
 
-    @POST(Address.postBaseUrl)
+    @GET(Address.orders)
+    fun getOrders(@Query("customerId") id:Int):Call<String>
+
+    @GET(Address.userInfo)
+    fun getUserInfo(@Query("customerId") id: Int):Call<String>
+
+    @POST(Address.postUrl)
     @Headers("Content-Type:application/x-www-form-urlencoded")
     @FormUrlEncoded
     fun postWishlist(

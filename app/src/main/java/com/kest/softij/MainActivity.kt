@@ -74,12 +74,23 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
     }
 
     override fun onNavigationItemSelected(item: MenuItem): Boolean {
-        if(item.itemId == R.id.my_home){
-            while (supportFragmentManager.backStackEntryCount > 0){
-                supportFragmentManager.popBackStackImmediate()
+        when (item.itemId) {
+            R.id.my_home -> {
+                while (supportFragmentManager.backStackEntryCount > 0){
+                    supportFragmentManager.popBackStackImmediate()
+                }
             }
-        }else if(item.itemId == R.id.my_wishlist){
-            replaceFragment(ListFragment.init(ListFragment.LIST_WISHLIST),R.string.title_my_wishlist)
+            R.id.my_wishlist -> {
+                replaceFragment(
+                    ListFragment.init(ListFragment.LIST_WISHLIST),
+                    R.string.title_my_wishlist)
+            }
+            R.id.my_order -> {
+                replaceFragment(
+                    ListFragment.init(ListFragment.LIST_ORDERS),
+                    R.string.title_my_order
+                )
+            }
         }
         drawerLayout.closeDrawer(GravityCompat.START)
         return true

@@ -17,5 +17,15 @@
     <string name="title_home">Home</string>
     <string name="title_cart">Cart</string>
     <string name="title_product">Product</string>
+    <string name="text_viewed">%1$s Viewed</string>
     <string name="text_desc">Description</string>
+    <string name="text_stock">%1$s left</string>
+    <string name="text_date_available">Available From: %1$s</string>
+    <string name="text_order_date">Order Placed On: %1$s</string>
+    <string name="text_order_status">Status: %1$s</string>
+    <string name="text_order_quantity">Quantity: %1$s</string>
+    <string name="switch_news">Newsletter</string>
+    <string name="btn_acc_edit">Edit User Information</string>
+    <string name="btn_cng_pass">Change Password</string>
+    <string name="btn_address">Edit Address</string>
 </resources>

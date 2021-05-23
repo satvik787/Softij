@@ -6,19 +6,18 @@ import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.Button
-import android.widget.ImageView
-import android.widget.LinearLayout
-import android.widget.TextView
+import android.widget.*
 import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.kest.softij.api.model.Order
 import com.kest.softij.api.model.Product
 
 
-class ListFragment : Fragment() {
+class ListFragment: Fragment() {
 
     private lateinit var recyclerView: RecyclerView
+    private var listType:Int? = null
     private val viewModel:ListViewModel by lazy{
         ViewModelProvider(this).get(ListViewModel::class.java)
     }
@@ -27,11 +26,12 @@ class ListFragment : Fragment() {
     companion object{
         const val LIST_PRODUCTS = 0
         const val LIST_WISHLIST = 1
-        private const val KEY_LIST = "KEY_LIST"
+        const val LIST_ORDERS = 2
+        private const val LIST_TYPE = "KEY_LIST"
         fun init(type:Int):ListFragment{
             return ListFragment().apply {
                 val bundle = Bundle()
-                bundle.putInt(KEY_LIST,type)
+                bundle.putInt(LIST_TYPE,type)
                 arguments = bundle
             }
         }
@@ -45,7 +45,8 @@ class ListFragment : Fragment() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         arguments?.let {
-            viewModel.init(it.getInt(KEY_LIST))
+            listType = it.getInt(LIST_TYPE)
+            if(savedInstanceState == null) viewModel.init(listType!!)
         }
     }
 
@@ -60,16 +61,63 @@ class ListFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
         recyclerView = view as RecyclerView
         recyclerView.layoutManager = LinearLayoutManager(context)
-        viewModel.products.observe(viewLifecycleOwner,{
-            it?.let { res ->
-                res.data?.let { list ->
-                    recyclerView.adapter = SearchAdapter(list)
+        if(listType == LIST_ORDERS){
+            viewModel.orders.observe(viewLifecycleOwner,{
+                it?.let { res->
+                    res.data?.let{ list ->
+                        recyclerView.adapter = OrderAdapter(list)
+                    }?:run{
+                        Toast.makeText(context,res.msg,Toast.LENGTH_LONG).show()
+                    }
                 }
-            }
-        })
+            })
+        }else {
+            viewModel.products.observe(viewLifecycleOwner, {
+                it?.let { res ->
+                    res.data?.let { list ->
+                        recyclerView.adapter = ProductAdapter(list)
+                    }?:run{
+                        Toast.makeText(context,res.msg,Toast.LENGTH_LONG).show()
+                    }
+                }
+            })
+        }
     }
 
-    private inner class SearchAdapter(private var list:MutableList<Product>)
+    private inner class OrderAdapter(private var list:MutableList<Order>)
+        :RecyclerView.Adapter<OrderViewHolder>() {
+        override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): OrderViewHolder {
+            val view:View = LayoutInflater.from(parent.context).inflate(R.layout.item_order,parent,false)
+            return OrderViewHolder(view)
+        }
+
+        override fun onBindViewHolder(holder: OrderViewHolder, position: Int) {
+            holder.bind(list[position])
+        }
+
+        override fun getItemCount() = list.size
+
+    }
+
+    private inner class OrderViewHolder(view :View) :RecyclerView.ViewHolder(view){
+        private val image:ImageView = view.findViewById(R.id.img_order)
+        private val name:TextView = view.findViewById(R.id.order_name)
+        private val quantity:TextView = view.findViewById(R.id.order_quantity)
+        private val date:TextView = view.findViewById(R.id.order_date)
+        private val price:TextView = view.findViewById(R.id.order_price)
+        private val status:TextView = view.findViewById(R.id.order_status)
+
+        fun bind(order: Order){
+            name.text = order.name
+            quantity.text = getString(R.string.text_order_quantity,order.quantity.toString())
+            date.text = getString(R.string.text_order_date,order.dateAdded.substring(0,11))
+            price.text = getString(R.string.text_product_price,order.totalPrice.toString())
+            status.text = getString(R.string.text_order_status,order.orderStatusId.toString())
+        }
+
+    }
+
+    private inner class ProductAdapter(private var list:MutableList<Product>)
         :RecyclerView.Adapter<ProductViewHolder>(){
         override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ProductViewHolder {
             val view:View = LayoutInflater.from(parent.context).inflate(R.layout.item_product,parent,false)
@@ -87,7 +135,7 @@ class ListFragment : Fragment() {
     private inner class ProductViewHolder(view:View)
         :RecyclerView.ViewHolder(view),View.OnClickListener{
         val image:ImageView = view.findViewById(R.id.img_product)
-        val name:TextView = view.findViewById(R.id.product_name)
+        val name:TextView = view.findViewById(R.id.order_name)
         val model:TextView = view.findViewById(R.id.product_model)
         val price:TextView = view.findViewById(R.id.product_price)
         val buyBtn:Button = view.findViewById(R.id.product_buy)

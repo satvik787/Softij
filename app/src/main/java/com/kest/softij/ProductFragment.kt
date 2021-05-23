@@ -32,7 +32,7 @@ class ProductFragment : Fragment() {
         arguments?.let {
             viewModel.product = it.getSerializable(KEY_PRODUCT) as Product
         }
-        viewModel.checkWishlist(2)
+        if(viewModel.inWishlist == null) viewModel.checkWishlist(31)
     }
 
     override fun onCreateView(
@@ -56,12 +56,12 @@ class ProductFragment : Fragment() {
         btnWishlist = view.findViewById<Button>(R.id.btn_wishlist).apply {
             isEnabled = !viewModel.inWishlist!!
             setOnClickListener {
-                viewModel.postWishlist(2)
+                viewModel.postWishlist(31)
                 setObserver()
                 isEnabled = false
             }
         }
-        view.findViewById<TextView>(R.id.product_name)
+        view.findViewById<TextView>(R.id.order_name)
             .text = viewModel.product.name
         view.findViewById<TextView>(R.id.product_model)
             .text = viewModel.product.model
@@ -70,7 +70,11 @@ class ProductFragment : Fragment() {
         view.findViewById<TextView>(R.id.product_desc)
             .text =  viewModel.product.description
         view.findViewById<TextView>(R.id.product_viewed)
-            .text = viewModel.product.viewed.toString()
+            .text = getString(R.string.text_viewed,viewModel.product.viewed.toString())
+        view.findViewById<TextView>(R.id.product_stock)
+            .text = getString(R.string.text_stock,viewModel.product.stock.toString())
+        view.findViewById<TextView>(R.id.product_date)
+            .text = getString(R.string.text_date_available,viewModel.product.dateAdded.substring(0,11))
     }
 
     private fun setObserver(){
