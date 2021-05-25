@@ -1,4 +1,4 @@
-package com.kest.softij
+package com.kest.softij.vm
 
 import androidx.lifecycle.ViewModel
 import java.util.*

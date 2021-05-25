@@ -5,15 +5,15 @@ import java.net.URL
 
 data class User
     (val customerId:Int,
-    val storeId:Int,
-    val firstName:String,
-    val lastName:String,
-    val email:String,
-    val addressId:Int,
-    val telephone:String,
-    val ip:URL,
-    val fax:String,
-    val dateAdded:String)
+     val storeId:Int,
+     var firstName:String,
+     var lastName:String,
+     var email:String,
+     val addressId:Int,
+     var telephone:String,
+     val ip:String,
+     val fax:String,
+     val dateAdded:String)
 {
     class UserParser:Parser<User>{
         override fun parseJson(json:String):Res<User>{
@@ -26,12 +26,12 @@ data class User
                 User(
                     result.getInt("customer_id"),
                     result.getInt("store_id"),
-                    result.getString("first_name"),
-                    result.getString("last_name"),
+                    result.getString("firstname"),
+                    result.getString("lastname"),
                     result.getString("email"),
                     result.getInt("address_id"),
                     result.getString("telephone"),
-                    URL(result.getString("ip")),
+                    result.getString("ip"),
                     result.getString("fax"),
                     result.getString("date_added")
                 )

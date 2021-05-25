@@ -4,30 +4,52 @@ import retrofit2.Call
 import retrofit2.http.*
 
 interface Api {
-    @GET(Address.productList)
+    @GET(Routes.productList)
     fun getProducts(
         @Query("limit") limit:Int,
         @Query("start") start:Int):Call<String>
 
-    @GET(Address.wishlist)
+    @GET(Routes.wishlist)
     fun getWishlist(@Query("customerId") id:Int):Call<String>
 
-    @GET(Address.inWishlist)
+    @GET(Routes.inWishlist)
     fun inWishlist(@Query("customerId") customerId: Int,
                    @Query("productId") productId: Int):Call<String>
 
-    @GET(Address.orders)
+    @GET(Routes.orders)
     fun getOrders(@Query("customerId") id:Int):Call<String>
 
-    @GET(Address.userInfo)
+    @GET(Routes.userInfo)
     fun getUserInfo(@Query("customerId") id: Int):Call<String>
 
-    @POST(Address.postUrl)
+    @GET(Routes.address)
+    fun getAddress(@Query("customerId") id: Int):Call<String>
+
+    @POST(Routes.postUrl)
     @Headers("Content-Type:application/x-www-form-urlencoded")
     @FormUrlEncoded
     fun postWishlist(
         @Field("customerId") customerId:Int,
         @Field("productId") productId:Int,
-        @Field("route") route:String = Address.postWishlist):Call<String>
+        @Field("route") route:String = Routes.postWishlist):Call<String>
+
+    @POST(Routes.postUrl)
+    @Headers("Content-Type:application/x-www-form-urlencoded")
+    @FormUrlEncoded
+    fun postRemoveWishlist(
+        @Field("customerId") customerId:Int,
+        @Field("productId") productId:Int,
+        @Field("route") route:String = Routes.postRemoveWishlist):Call<String>
+
+    @POST(Routes.postUrl)
+    @Headers("Content-Type:application/x-www-form-urlencoded")
+    @FormUrlEncoded
+    fun postEditAccount(
+        @Field("customerId") customerId:Int,
+        @Field("firstname") firstname:String,
+        @Field("lastname") lastname:String,
+        @Field("email") email:String,
+        @Field("phone") phone:String,
+        @Field("route") route:String = Routes.editAccount):Call<String>
 
 }

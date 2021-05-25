@@ -27,5 +27,26 @@
     <string name="switch_news">Newsletter</string>
     <string name="btn_acc_edit">Edit User Information</string>
     <string name="btn_cng_pass">Change Password</string>
-    <string name="btn_address">Edit Address</string>
+    <string name="btn_address">Manage Addresses</string>
+    <string name="desc_edit_fname">First Name</string>
+    <string name="desc_edit_lname">Last Name</string>
+    <string name="desc_edit_Email"> Email</string>
+    <string name="desc_edit_phone">Phone Number</string>
+    <string name="btn_save">Save</string>
+    <string name="title_edit">Edit Profile</string>
+    <string name="desc_acc_password">Password</string>
+    <string name="desc_acc_password_confirm">Confirm Password</string>
+    <string name="title_cng_password">Change Password</string>
+    <string name="msg_loading">Loading…</string>
+    <string name="desc_address_add">Add Address</string>
+    <string name="desc_address1">Address 1</string>
+    <string name="desc_address2">Address 2</string>
+    <string name="desc_state">State</string>
+    <string name="desc_city">City</string>
+    <string name="desc_postcode">PostCode</string>
+    <string name="btn_edit">Edit</string>
+    <string name="btn_delete">Delete</string>
+    <string name="title_edit_addy">Edit Address</string>
+    <string name="title_add_addy">Add Address</string>
+    <string name="telangana">Telangana</string>
 </resources>

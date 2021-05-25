@@ -1,7 +1,9 @@
-package com.kest.softij
+package com.kest.softij.vm
 
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.ViewModel
+import com.kest.softij.ListFragment
+import com.kest.softij.SoftijRepository
 import com.kest.softij.api.model.Order
 import com.kest.softij.api.model.Product
 import com.kest.softij.api.model.Res

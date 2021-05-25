@@ -10,15 +10,17 @@ import android.widget.*
 import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.kest.softij.vm.ListViewModel
 import com.kest.softij.api.model.Order
 import com.kest.softij.api.model.Product
 
 
-class ListFragment: Fragment() {
+class ListFragment: Fragment(),ProductFragment.WishlistState {
 
     private lateinit var recyclerView: RecyclerView
     private var listType:Int? = null
-    private val viewModel:ListViewModel by lazy{
+
+    private val viewModel: ListViewModel by lazy{
         ViewModelProvider(this).get(ListViewModel::class.java)
     }
     private lateinit var toFragment:ProductFragment.ToProductFragment
@@ -84,7 +86,7 @@ class ListFragment: Fragment() {
         }
     }
 
-    private inner class OrderAdapter(private var list:MutableList<Order>)
+    private inner class OrderAdapter(var list:MutableList<Order>)
         :RecyclerView.Adapter<OrderViewHolder>() {
         override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): OrderViewHolder {
             val view:View = LayoutInflater.from(parent.context).inflate(R.layout.item_order,parent,false)
@@ -117,7 +119,7 @@ class ListFragment: Fragment() {
 
     }
 
-    private inner class ProductAdapter(private var list:MutableList<Product>)
+    private inner class ProductAdapter(var list:MutableList<Product>)
         :RecyclerView.Adapter<ProductViewHolder>(){
         override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ProductViewHolder {
             val view:View = LayoutInflater.from(parent.context).inflate(R.layout.item_product,parent,false)
@@ -125,7 +127,7 @@ class ListFragment: Fragment() {
         }
 
         override fun onBindViewHolder(holder: ProductViewHolder, position: Int) {
-            holder.bind(list[position])
+            holder.bind(list[position],position)
         }
 
         override fun getItemCount() = this.list.size
@@ -141,10 +143,12 @@ class ListFragment: Fragment() {
         val buyBtn:Button = view.findViewById(R.id.product_buy)
         val cartBtn:Button = view.findViewById(R.id.product_add_cart)
         lateinit var product: Product
+        var index:Int? = null
         init {
             view.findViewById<LinearLayout>(R.id.info_box).setOnClickListener(this)
         }
-        fun bind(product: Product){
+        fun bind(product: Product,index: Int){
+            this.index = index
             this.product = product
             image.setImageResource(R.mipmap.ic_wishlist)
             name.text = product.name
@@ -153,7 +157,24 @@ class ListFragment: Fragment() {
         }
 
         override fun onClick(v: View?) {
-            toFragment.navigate(product)
+            toFragment.launchProduct(ProductFragment.init(
+                this.product,
+                if(this@ListFragment.listType == LIST_WISHLIST) ProductFragment.WISHLIST_PRODUCT
+                else ProductFragment.DEFAULT,
+                this.index!!
+            ).apply{
+                if(this@ListFragment.listType == LIST_WISHLIST) {
+                    setTargetFragment(this@ListFragment,ProductFragment.WISHLIST_PRODUCT)
+                }
+            })
         }
     }
+
+    override fun onRemove(index:Int) {
+        val productAdapter = recyclerView.adapter as ProductAdapter
+        productAdapter.list.removeAt(index)
+        productAdapter.notifyItemRemoved(index)
+    }
+
+
 }
