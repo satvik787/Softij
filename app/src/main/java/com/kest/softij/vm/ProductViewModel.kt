@@ -18,15 +18,15 @@ class ProductViewModel : ViewModel() {
     lateinit var checkWishLiveData:LiveData<Res<Unit>>
 
     fun postWishlist(){
-        repo.postWishList(31,product.productId,putWishlist)
+        repo.postWishList(product.productId,putWishlist)
     }
 
     fun postRemoveWishlist(){
-        repo.postRemoveWishlist(31,product.productId,removeWishlist)
+        repo.postRemoveWishlist(product.productId,removeWishlist)
     }
 
     fun checkWishlist(customerId:Int){
-        checkWishLiveData = repo.inWishlist(customerId,product.productId)
+        checkWishLiveData = repo.inWishlist(product.productId)
     }
 
 

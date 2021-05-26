@@ -2,6 +2,7 @@
 <ScrollView
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
@@ -29,7 +30,7 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_marginStart="8dp"
-            android:layout_marginTop="27dp"
+            android:layout_marginTop="4dp"
             android:layout_marginEnd="8dp"
             android:autofillHints="@string/desc_edit_fname"
             android:background="@drawable/edit_text_background"
@@ -38,7 +39,7 @@
             android:padding="8dp"
             app:layout_constraintEnd_toStartOf="@+id/addy_lastname"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/addy_title" />
+            app:layout_constraintTop_toBottomOf="@+id/hint_firstname" />
 
         <EditText
             android:id="@+id/addy_lastname"
@@ -59,7 +60,7 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_marginStart="8dp"
-            android:layout_marginTop="8dp"
+            android:layout_marginTop="4dp"
             android:layout_marginEnd="8dp"
             android:autofillHints="@string/desc_address1"
             android:background="@drawable/edit_text_background"
@@ -67,15 +68,16 @@
             android:inputType="textPostalAddress"
             android:padding="8dp"
             app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="1.0"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/addy_firstname" />
+            app:layout_constraintTop_toBottomOf="@+id/hint_address1" />
 
         <EditText
             android:id="@+id/addy_address2"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_marginStart="8dp"
-            android:layout_marginTop="8dp"
+            android:layout_marginTop="4dp"
             android:layout_marginEnd="8dp"
             android:autofillHints="@string/desc_address2"
             android:background="@drawable/edit_text_background"
@@ -83,15 +85,16 @@
             android:inputType="textPostalAddress"
             android:padding="8dp"
             app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="0.0"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/addy_address1" />
+            app:layout_constraintTop_toBottomOf="@+id/hint_address2" />
 
         <EditText
             android:id="@+id/addy_city"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_marginStart="8dp"
-            android:layout_marginTop="8dp"
+            android:layout_marginTop="4dp"
             android:layout_marginEnd="8dp"
             android:autofillHints="@string/desc_state"
             android:background="@drawable/edit_text_background"
@@ -99,19 +102,20 @@
             android:inputType="textPostalAddress"
             android:padding="8dp"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintHorizontal_bias="1.0"
+            app:layout_constraintHorizontal_bias="0.0"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/addy_address2" />
+            app:layout_constraintTop_toBottomOf="@+id/hint_city" />
 
         <EditText
             android:id="@+id/addy_state"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_marginStart="8dp"
-            android:layout_marginTop="8dp"
+            android:layout_marginTop="4dp"
             android:layout_marginEnd="8dp"
             android:autofillHints="@string/desc_state"
             android:background="@drawable/edit_text_background"
+            android:enabled="false"
             android:hint="@string/desc_state"
             android:inputType="textPostalAddress"
             android:padding="8dp"
@@ -119,14 +123,14 @@
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintHorizontal_bias="0.0"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/addy_city" />
+            app:layout_constraintTop_toBottomOf="@+id/hint_state" />
 
         <EditText
             android:id="@+id/addy_postcode"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_marginStart="8dp"
-            android:layout_marginTop="8dp"
+            android:layout_marginTop="4dp"
             android:layout_marginEnd="8dp"
             android:autofillHints="@string/desc_postcode"
             android:background="@drawable/edit_text_background"
@@ -137,7 +141,7 @@
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintHorizontal_bias="0.0"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/addy_state" />
+            app:layout_constraintTop_toBottomOf="@+id/hint_postcode" />
 
         <Button
             android:id="@+id/addy_save"
@@ -150,6 +154,75 @@
             app:cornerRadius="10dp"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/addy_postcode" />
+
+        <TextView
+            android:id="@+id/hint_firstname"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="8dp"
+            android:layout_marginTop="16dp"
+            android:text="@string/desc_edit_fname"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/addy_title" />
+
+        <TextView
+            android:id="@+id/hint_lastname"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="124dp"
+            android:text="@string/desc_edit_lname"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="@+id/hint_firstname" />
+
+        <TextView
+            android:id="@+id/hint_address1"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="8dp"
+            android:layout_marginTop="8dp"
+            android:text="@string/desc_address1"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/addy_firstname" />
+
+        <TextView
+            android:id="@+id/hint_address2"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="8dp"
+            android:layout_marginTop="8dp"
+            android:text="@string/desc_address2"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/addy_address1" />
+
+        <TextView
+            android:id="@+id/hint_city"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="8dp"
+            android:layout_marginTop="8dp"
+            android:text="@string/desc_city"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/addy_address2" />
+
+        <TextView
+            android:id="@+id/hint_state"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="8dp"
+            android:layout_marginTop="8dp"
+            android:text="@string/desc_state"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/addy_city" />
+
+        <TextView
+            android:id="@+id/hint_postcode"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="8dp"
+            android:layout_marginTop="8dp"
+            android:text="@string/desc_postcode"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/addy_state" />
 
 
     </androidx.constraintlayout.widget.ConstraintLayout>

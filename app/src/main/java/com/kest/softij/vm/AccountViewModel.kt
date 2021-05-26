@@ -7,7 +7,7 @@ import com.kest.softij.api.model.Res
 import com.kest.softij.api.model.User
 
 class AccountViewModel : ViewModel() {
-    val userData = SoftijRepository.getRepo().getUserInfo(31)
+    val userData = SoftijRepository.getRepo().getUserInfo()
     val updateStatus: MutableLiveData<Res<Unit>> = MutableLiveData()
     lateinit var user: User
 

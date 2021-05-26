@@ -14,5 +14,8 @@ class Routes {
         const val postWishlist:String = "account/wishlist"
         const val postRemoveWishlist:String = "account/wishlist/remove"
         const val editAccount:String = "account/edit"
+        const val insertAddress:String = "account/address"
+        const val editAddress:String = "account/address/edit"
+        const val deleteAddress:String = "account/address/delete"
     }
 }

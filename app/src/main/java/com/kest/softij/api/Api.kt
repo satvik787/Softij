@@ -25,6 +25,8 @@ interface Api {
     @GET(Routes.address)
     fun getAddress(@Query("customerId") id: Int):Call<String>
 
+
+
     @POST(Routes.postUrl)
     @Headers("Content-Type:application/x-www-form-urlencoded")
     @FormUrlEncoded
@@ -51,5 +53,40 @@ interface Api {
         @Field("email") email:String,
         @Field("phone") phone:String,
         @Field("route") route:String = Routes.editAccount):Call<String>
+
+    @POST(Routes.postUrl)
+    @Headers("Content-Type:application/x-www-form-urlencoded")
+    @FormUrlEncoded
+    fun postEditAddress(
+        @Field("addressId") addressId:Int,
+        @Field("address1") address1:String,
+        @Field("address2") address2:String,
+        @Field("firstname") firstname:String,
+        @Field("lastname") lastname:String,
+        @Field("city") city:String,
+        @Field("postcode") postCode:String,
+        @Field("zoneId") zoneId:Int = 4231,
+        @Field("route") route:String = Routes.editAddress):Call<String>
+
+    @POST(Routes.postUrl)
+    @Headers("Content-Type:application/x-www-form-urlencoded")
+    @FormUrlEncoded
+    fun postDeleteAddress(
+        @Field("addressId") addressId:Int,
+        @Field("route") route:String = Routes.deleteAddress):Call<String>
+
+    @POST(Routes.postUrl)
+    @Headers("Content-Type:application/x-www-form-urlencoded")
+    @FormUrlEncoded
+    fun postInsertAddress(
+        @Field("customerId") customerI:Int,
+        @Field("address1") address1:String,
+        @Field("address2") address2:String,
+        @Field("firstname") firstname:String,
+        @Field("lastname") lastname:String,
+        @Field("city") city:String,
+        @Field("postcode") postCode:String,
+        @Field("zoneId") zoneId:Int = 4231,
+        @Field("route") route:String = Routes.insertAddress):Call<String>
 
 }

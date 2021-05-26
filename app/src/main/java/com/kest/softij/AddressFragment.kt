@@ -39,14 +39,26 @@ class AddressFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
         recyclerView = view.findViewById(R.id.address_list)
         recyclerView.layoutManager = LinearLayoutManager(context)
-        val addBtn = view.findViewById<View>(R.id.btn_address_add)
+        view.findViewById<View>(R.id.btn_address_add).setOnClickListener {
+            dialogLayoutHolder.build(
+                Address.default(),
+                -1
+            )
+            addressDialog.show()
+        }
         viewModel.addressList.observe(viewLifecycleOwner,{
             it?.let{ res ->
                 if(res.code > 0){
                     recyclerView.adapter = AddressAdapter(res.data!!)
                 }else{
+
                     Toast.makeText(context,res.msg,Toast.LENGTH_LONG).show()
                 }
+            }
+        })
+        viewModel.postLiveData.observe(viewLifecycleOwner,{
+            it?.let { res ->
+                Toast.makeText(context,res.msg,Toast.LENGTH_SHORT).show()
             }
         })
     }
@@ -74,7 +86,7 @@ class AddressFragment : Fragment() {
         }
 
         override fun onBindViewHolder(holder: AddressViewHolder, position: Int) {
-            holder.build(list[position])
+            holder.build(list[position],position)
         }
 
         override fun getItemCount() = list.size
@@ -83,6 +95,7 @@ class AddressFragment : Fragment() {
 
     private inner class AddressViewHolder(view:View):RecyclerView.ViewHolder(view){
         private lateinit var address: Address
+        private var index:Int? = null
         private val address1 = view.findViewById<TextView>(R.id.address1)
         private val address2 = view.findViewById<TextView>(R.id.address2)
         private val city = view.findViewById<TextView>(R.id.city)
@@ -91,15 +104,20 @@ class AddressFragment : Fragment() {
         private val postcode = view.findViewById<TextView>(R.id.postcode)
         init {
             view.findViewById<Button>(R.id.btn_edit).setOnClickListener{
-                dialogLayoutHolder.build(address)
+                dialogLayoutHolder.build(address,index!!)
                 addressDialog.show()
             }
+            view.findViewById<Button>(R.id.btn_delete).setOnClickListener {
+                val adapter = recyclerView.adapter as AddressAdapter
+                adapter.list.removeAt(index!!)
+                adapter.notifyItemRemoved(index!!)
+                viewModel.postDeleteAddress(address.addressId)
+            }
         }
-        private val deleteBtn = view.findViewById<Button>(R.id.btn_delete)
 
-
-        fun build(address: Address){
+        fun build(address: Address,index:Int){
             this.address = address
+            this.index = index
             address1.text = address.address1
             address2.text =  address.address2
             city.text = address.city
@@ -113,6 +131,8 @@ class AddressFragment : Fragment() {
 
 
     private inner class DialogLayoutHolder(val view:View){
+        private var index:Int? = null
+        private lateinit var address:Address
         private val title = view.findViewById<TextView>(R.id.addy_title)
         private val address1 = view.findViewById<EditText>(R.id.addy_address1)
         private val address2 = view.findViewById<EditText>(R.id.addy_address2)
@@ -124,19 +144,49 @@ class AddressFragment : Fragment() {
 
         init {
             view.findViewById<Button>(R.id.addy_save).setOnClickListener {
+                address.firstname = firstname.text.toString()
+                address.lastname = lastname.text.toString()
+                address.address1 = address1.text.toString()
+                address.address2 = address2.text.toString()
+                address.city = city.text.toString()
+                address.state = state.text.toString()
+                address.postCode = postcode.text.toString()
+                if(index!! >= 0) {
+                    viewModel.postEditAddress(address)
+                    recyclerView.adapter?.notifyItemChanged(index!!)
+                }else{
+                    val adapter = recyclerView.adapter as AddressAdapter
+                    adapter.list.add(address)
+                    adapter.notifyItemInserted(adapter.list.size - 1)
+                    viewModel.postInsertAddress(address)
+                }
                 addressDialog.dismiss()
+                clean()
             }
         }
 
-        fun build(address: Address){
-            title.text = getString(R.string.title_edit_addy)
+        fun build(address: Address,index: Int){
+            this.address = address
+            this.index = index
+            title.text = if(index >= 0) getString(R.string.title_edit_addy)
+            else getString(R.string.title_add_addy)
+            firstname.setText(address.firstname)
+            lastname.setText(address.lastname)
             address1.setText(address.address1)
             address2.setText(address.address2)
             city.setText(address.city)
             state.setText(address.state)
-            firstname.setText(address.firstname)
-            lastname.setText(address.lastname)
             postcode.setText(address.postCode)
+        }
+        fun clean(){
+            title.text = ""
+            firstname.setText("")
+            lastname.setText("")
+            address1.setText("")
+            address2.setText("")
+            city.setText("")
+            state.setText("")
+            postcode.setText("")
         }
 
     }

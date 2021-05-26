@@ -51,10 +51,10 @@ class AccountFragment : Fragment() {
 
         if(activity?.resources?.configuration?.orientation == Configuration.ORIENTATION_PORTRAIT) {
             passwordDialog = BottomSheetDialog(context!!, R.style.BottomSheetDialogStyle).apply {
-                setContentView(editLayout!!)
+                setContentView(passwordLayout!!)
             }
             editDialog = BottomSheetDialog(context!!, R.style.BottomSheetDialogStyle).apply {
-                setContentView(passwordLayout!!)
+                setContentView(editLayout!!)
             }
         }else if(activity?.resources?.configuration?.orientation == Configuration.ORIENTATION_LANDSCAPE){
             passwordDialog = AlertDialog.Builder(context!!).apply { setView(editLayout) }.create()

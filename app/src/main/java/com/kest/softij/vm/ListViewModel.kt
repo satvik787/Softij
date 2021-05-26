@@ -16,8 +16,8 @@ class ListViewModel:ViewModel() {
     fun init(type:Int){
         when (type) {
             ListFragment.LIST_PRODUCTS -> products = repo.getProducts(3647,50)
-            ListFragment.LIST_WISHLIST -> products = repo.getWishList(31)
-            ListFragment.LIST_ORDERS -> orders = repo.getOrders(31)
+            ListFragment.LIST_WISHLIST -> products = repo.getWishList()
+            ListFragment.LIST_ORDERS -> orders = repo.getOrders()
         }
     }
 

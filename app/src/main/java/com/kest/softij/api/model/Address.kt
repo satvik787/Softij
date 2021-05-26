@@ -4,17 +4,34 @@ import org.json.JSONObject
 
 data class Address(
     val addressId:Int,
-    val firstname:String,
-    val lastname:String,
+    var firstname:String,
+    var lastname:String,
     val company:String,
-    val address1:String,
-    val address2:String,
-    val city:String,
-    val state:String,
-    val postCode:String,
+    var address1:String,
+    var address2:String,
+    var city:String,
+    var state:String,
+    var postCode:String,
     val zoneId:Int,
     val countryId:Int = 99,
 ) {
+    companion object{
+        fun default():Address{
+            return Address(
+                0,
+                "",
+                "",
+                "",
+                "",
+                "",
+                "",
+                "Telangana",
+                "",
+                0,
+                99,
+            )
+        }
+    }
     class AddressParser:Parser<MutableList<Address>>{
         override fun parseJson(json: String): Res<MutableList<Address>> {
             val jsonObj = JSONObject(json)
