@@ -29,6 +29,8 @@ class ProductViewModel : ViewModel() {
         checkWishLiveData = repo.inWishlist(product.productId)
     }
 
-
+    fun postUpdateViews(){
+        repo.postUpdateViews(product.productId, MutableLiveData())
+    }
 
 }

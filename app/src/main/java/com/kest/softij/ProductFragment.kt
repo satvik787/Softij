@@ -47,6 +47,7 @@ class ProductFragment : Fragment() {
             index = it.getInt(KEY_INDEX)
         }
         if(viewModel.inWishlist == null) viewModel.checkWishlist(31)
+
     }
 
 
@@ -78,6 +79,15 @@ class ProductFragment : Fragment() {
                 Toast.makeText(context,res.msg,Toast.LENGTH_SHORT).show()
             }
         })
+
+    }
+
+    override fun onStop() {
+        super.onStop()
+        if(isRemoving){
+            viewModel.postUpdateViews()
+            viewModel.product.viewed++
+        }
     }
 
     override fun onDestroy() {

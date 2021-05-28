@@ -10,26 +10,36 @@ import android.widget.*
 import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.kest.softij.api.model.CartItem
 import com.kest.softij.vm.ListViewModel
 import com.kest.softij.api.model.Order
 import com.kest.softij.api.model.Product
+import com.kest.softij.vm.MainViewModel
 
 
 class ListFragment: Fragment(),ProductFragment.WishlistState {
 
     private lateinit var recyclerView: RecyclerView
-    private var listType:Int? = null
+    private lateinit var activityViewModel:MainViewModel
+    private lateinit var loading:ProgressBar
+    private var count = 0
+    private var listSize = 0
+    var listType:Int? = null
 
     private val viewModel: ListViewModel by lazy{
         ViewModelProvider(this).get(ListViewModel::class.java)
     }
     private lateinit var toFragment:ProductFragment.ToProductFragment
+    private lateinit var progressBar:ProgressBar
+    private lateinit var emptyMsg:TextView
 
     companion object{
         const val LIST_PRODUCTS = 0
         const val LIST_WISHLIST = 1
         const val LIST_ORDERS = 2
+        const val LIST_SEARCH = 3
         private const val LIST_TYPE = "KEY_LIST"
+
         fun init(type:Int):ListFragment{
             return ListFragment().apply {
                 val bundle = Bundle()
@@ -61,26 +71,61 @@ class ListFragment: Fragment(),ProductFragment.WishlistState {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        recyclerView = view as RecyclerView
+        loading = view.findViewById(R.id.search_loading)
+        progressBar = view.findViewById(R.id.list_progressBar)
+        progressBar.visibility = View.VISIBLE
+        emptyMsg = view.findViewById<TextView>(R.id.list_msg)
+        recyclerView = view.findViewById(R.id.list)
         recyclerView.layoutManager = LinearLayoutManager(context)
+        viewModel.postLiveData.observe(viewLifecycleOwner,{
+            it?.let { res->
+                Toast.makeText(context,res.msg,Toast.LENGTH_SHORT).show()
+            }
+        })
         if(listType == LIST_ORDERS){
             viewModel.orders.observe(viewLifecycleOwner,{
                 it?.let { res->
                     res.data?.let{ list ->
                         recyclerView.adapter = OrderAdapter(list)
+                        progressBar.visibility = View.GONE
                     }?:run{
                         Toast.makeText(context,res.msg,Toast.LENGTH_LONG).show()
                     }
                 }
             })
-        }else {
+        }else if(listType == LIST_PRODUCTS || listType == LIST_WISHLIST){
             viewModel.products.observe(viewLifecycleOwner, {
                 it?.let { res ->
                     res.data?.let { list ->
                         recyclerView.adapter = ProductAdapter(list)
+                        progressBar.visibility = View.GONE
                     }?:run{
                         Toast.makeText(context,res.msg,Toast.LENGTH_LONG).show()
                     }
+                }
+            })
+        }
+    }
+
+    override fun onActivityCreated(savedInstanceState: Bundle?) {
+        super.onActivityCreated(savedInstanceState)
+        activityViewModel = ViewModelProvider(activity!!).get(MainViewModel::class.java)
+        if(listType == LIST_SEARCH) {
+            activityViewModel.searchData.observe(viewLifecycleOwner, {
+                it?.let { res ->
+                    if (res.code > 0) {
+                        if(res.data!!.size == 0) emptyMsg.visibility = View.VISIBLE
+                        else emptyMsg.visibility = View.GONE
+                        listSize = res.data.size
+                        recyclerView.adapter = ProductAdapter(res.data!!)
+                        progressBar.visibility = View.GONE
+                    } else Toast.makeText(context, res.msg, Toast.LENGTH_LONG).show()
+                    loading.visibility = View.GONE
+                }
+            })
+            activityViewModel.count.observe(viewLifecycleOwner,{
+                it?.let{
+                    count = it
                 }
             })
         }
@@ -127,7 +172,7 @@ class ListFragment: Fragment(),ProductFragment.WishlistState {
         }
 
         override fun onBindViewHolder(holder: ProductViewHolder, position: Int) {
-            holder.bind(list[position],position)
+            holder.bind(list[position])
         }
 
         override fun getItemCount() = this.list.size
@@ -136,19 +181,36 @@ class ListFragment: Fragment(),ProductFragment.WishlistState {
 
     private inner class ProductViewHolder(view:View)
         :RecyclerView.ViewHolder(view),View.OnClickListener{
+        lateinit var product: Product
         val image:ImageView = view.findViewById(R.id.img_product)
         val name:TextView = view.findViewById(R.id.order_name)
         val model:TextView = view.findViewById(R.id.product_model)
         val price:TextView = view.findViewById(R.id.product_price)
         val buyBtn:Button = view.findViewById(R.id.product_buy)
-        val cartBtn:Button = view.findViewById(R.id.product_add_cart)
-        lateinit var product: Product
-        var index:Int? = null
         init {
+            view.findViewById<Button>(R.id.product_add_cart).setOnClickListener {
+                if(listType == LIST_PRODUCTS || listType == LIST_SEARCH){
+                    viewModel.addToCart(product,activityViewModel.cartStatus)
+                }else if(listType == LIST_WISHLIST){
+                    viewModel.addToCart(product,activityViewModel.cartStatus)
+                    onRemove(adapterPosition)
+                    viewModel.postRemoveWishlist(product.productId)
+                }
+            }
             view.findViewById<LinearLayout>(R.id.info_box).setOnClickListener(this)
         }
-        fun bind(product: Product,index: Int){
-            this.index = index
+
+        fun bind(product: Product){
+            if(listType == LIST_SEARCH) {
+                if (listSize < count && adapterPosition == listSize - 1) {
+                    loading.visibility = View.VISIBLE
+                    activityViewModel.search(
+                        activityViewModel.recentQuery,
+                        50,
+                        product.productId + 1
+                    )
+                }
+            }
             this.product = product
             image.setImageResource(R.mipmap.ic_wishlist)
             name.text = product.name
@@ -161,7 +223,7 @@ class ListFragment: Fragment(),ProductFragment.WishlistState {
                 this.product,
                 if(this@ListFragment.listType == LIST_WISHLIST) ProductFragment.WISHLIST_PRODUCT
                 else ProductFragment.DEFAULT,
-                this.index!!
+                adapterPosition
             ).apply{
                 if(this@ListFragment.listType == LIST_WISHLIST) {
                     setTargetFragment(this@ListFragment,ProductFragment.WISHLIST_PRODUCT)

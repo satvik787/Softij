@@ -1,5 +1,6 @@
 package com.kest.softij.api.model
 
+import androidx.lifecycle.MutableLiveData
 import org.json.JSONObject
 import java.io.Serializable
 
@@ -15,11 +16,12 @@ open class Product(
     var viewed:Int
     ):Serializable
 {
+
     class ProductParser:Parser<MutableList<Product>>{
         override fun parseJson(json:String):Res<MutableList<Product>>{
             val data = mutableListOf<Product>()
             val resJson = JSONObject(json)
-            val res = Res<MutableList<Product>>(
+            val res = Res(
                 resJson.getString("Msg"),
                 resJson.getInt("code"),
                 resJson.getInt("numRows"),

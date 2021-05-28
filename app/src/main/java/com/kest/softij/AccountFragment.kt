@@ -8,11 +8,9 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.Button
-import android.widget.EditText
-import android.widget.TextView
-import android.widget.Toast
+import android.widget.*
 import androidx.appcompat.app.AlertDialog
+import androidx.appcompat.widget.SwitchCompat
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import com.google.android.material.bottomsheet.BottomSheetDialog
@@ -44,8 +42,10 @@ class AccountFragment : Fragment() {
         return layout
     }
 
+
     override fun onActivityCreated(savedInstanceState: Bundle?) {
         super.onActivityCreated(savedInstanceState)
+
         val editLayout = activity?.layoutInflater?.inflate(R.layout.dialog_edit_user, null)
         val passwordLayout = activity?.layoutInflater?.inflate(R.layout.dialog_change_password,null)
 
@@ -57,38 +57,56 @@ class AccountFragment : Fragment() {
                 setContentView(editLayout!!)
             }
         }else if(activity?.resources?.configuration?.orientation == Configuration.ORIENTATION_LANDSCAPE){
-            passwordDialog = AlertDialog.Builder(context!!).apply { setView(editLayout) }.create()
-            editDialog  = AlertDialog.Builder(context!!).apply { setView(passwordLayout) }.create()
+            passwordDialog = AlertDialog.Builder(context!!).apply { setView(passwordLayout) }.create()
+            editDialog  = AlertDialog.Builder(context!!).apply { setView(editLayout) }.create()
             editDialog.window?.setBackgroundDrawableResource(R.drawable.round_dialog)
             passwordDialog.window?.setBackgroundDrawableResource(R.drawable.search_background)
         }
         viewModel.userData.observe(viewLifecycleOwner,{
-            it?.let { res ->
-                if (res.code > 0){
-                    viewModel.user = res.data!!
-                    loadUI(layout,editLayout,passwordLayout)
-                }else Toast.makeText(context,res.msg,Toast.LENGTH_LONG).show()
+            it?.let { user ->
+                viewModel.user = user
+                viewModel.updateUser = user.copy()
+                loadUI(layout,editLayout,passwordLayout)
             }
         })
         viewModel.updateStatus.observe(viewLifecycleOwner,{
             it?.let { res->
+                if(res.code > 0) {
+                    viewModel.user = viewModel.updateUser.copy()
+                    viewModel.updateLocal(viewModel.user)
+                }
+                else viewModel.updateUser = viewModel.user.copy()
                 Toast.makeText(context,res.msg,Toast.LENGTH_LONG).show()
+            }
+        })
+        viewModel.updateSubData.observe(viewLifecycleOwner,{
+            it?.let { res->
+                Toast.makeText(context,res.msg,Toast.LENGTH_SHORT).show()
             }
         })
     }
 
 
     private fun loadUI(view:View,editLayout:View?,passwordLayout:View?){
-        initEditLayout(editLayout)
-        initPasswordLayout(passwordLayout)
+        view.findViewById<SwitchCompat>(R.id.switch_news).apply {
+            isChecked = viewModel.user.newsletter == 1
+            setOnCheckedChangeListener(object :CompoundButton.OnCheckedChangeListener{
+                override fun onCheckedChanged(buttonView: CompoundButton?, isChecked: Boolean) {
+                    viewModel.user.newsletter = if (isChecked) 1 else 0
+                    viewModel.postUpdateSub()
+                }
+            })
+        }
         view.findViewById<TextView>(R.id.account_name)
             .text = viewModel.user.firstName
         view.findViewById<TextView>(R.id.account_email)
             .text = viewModel.user.email
         view.findViewById<Button>(R.id.btn_acc_edit).setOnClickListener {
+            initEditLayout(editLayout)
             editDialog.show()
         }
         view.findViewById<Button>(R.id.btn_cng_pass).setOnClickListener {
+            initPasswordLayout(passwordLayout)
             passwordDialog.show()
         }
         view.findViewById<Button>(R.id.btn_acc_address).setOnClickListener {
@@ -110,14 +128,22 @@ class AccountFragment : Fragment() {
         val lname = view?.findViewById<EditText>(R.id.acc_last_name)?.apply { setText(viewModel.user.lastName) }
         val email = view?.findViewById<EditText>(R.id.acc_edit_email)?.apply { setText(viewModel.user.email) }
         val phone = view?.findViewById<EditText>(R.id.acc_edit_phone)?.apply { setText(viewModel.user.telephone) }
+        val textMsg = view?.findViewById<TextView>(R.id.acc_msg)
         view?.findViewById<Button>(R.id.cng_save)?.setOnClickListener {
-            viewModel.user.firstName = fname?.text.toString()
-            viewModel.user.lastName  = lname?.text.toString()
-            viewModel.user.email     = email?.text.toString()
-            viewModel.user.telephone = phone?.text.toString()
-            editDialog.dismiss()
-            viewModel.updateUserInfo()
-
+            viewModel.updateUser.firstName = fname?.text.toString()
+            viewModel.updateUser.lastName  = lname?.text.toString()
+            viewModel.updateUser.email     = email?.text.toString()
+            viewModel.updateUser.telephone = phone?.text.toString()
+            var msg = ""
+            if(SoftijRepository.validateEmail(email?.text.toString())){
+                if(fname?.text?.length!! in 4..30 && lname?.text?.length!! in 4..30){
+                    if(phone?.text?.length!! == 10){
+                        editDialog.dismiss()
+                        viewModel.updateUserInfo()
+                    }else msg = getString(R.string.msg_invalid_phone)
+                }else msg = getString(R.string.msg_invalid_name)
+            }else msg = getString(R.string.msg_invalid_email)
+            textMsg?.text = msg
         }
         return view!!
     }

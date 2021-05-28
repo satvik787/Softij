@@ -25,6 +25,13 @@ interface Api {
     @GET(Routes.address)
     fun getAddress(@Query("customerId") id: Int):Call<String>
 
+    @GET(Routes.searchCount)
+    fun getListCount(@Query("query") query:String):Call<String>
+
+    @GET(Routes.search)
+    fun search(@Query("query") query: String,
+               @Query("limit") limit:Int,
+               @Query("start") start: Int):Call<String>
 
 
     @POST(Routes.postUrl)
@@ -74,6 +81,20 @@ interface Api {
     fun postDeleteAddress(
         @Field("addressId") addressId:Int,
         @Field("route") route:String = Routes.deleteAddress):Call<String>
+
+    @POST(Routes.postUrl)
+    @Headers("Content-Type:application/x-www-form-urlencoded")
+    @FormUrlEncoded
+    fun postUpdateView(
+        @Field("productId") productId:Int,
+        @Field("route") route:String = Routes.updateViews):Call<String>
+
+    @POST(Routes.postUrl)
+    @Headers("Content-Type:application/x-www-form-urlencoded")
+    @FormUrlEncoded
+    fun postUpdateSub(
+        @Field("customerId") customerId:Int,
+        @Field("route") route:String = Routes.updateSub):Call<String>
 
     @POST(Routes.postUrl)
     @Headers("Content-Type:application/x-www-form-urlencoded")

@@ -49,4 +49,14 @@
     <string name="title_edit_addy">Edit Address</string>
     <string name="title_add_addy">Add Address</string>
     <string name="telangana">Telangana</string>
+    <string name="msg_invalid_email">Invalid Email</string>
+    <string name="msg_invalid_name">first name and lastname <br/> must have  4  or more characters</string>
+    <string name="msg_invalid_phone">Invalid Phone Number</string>
+    <string name="msg_invalid_addy">address 1 and address 2 length should be between 4 to 30</string>
+    <string name="msg_invalid_city">city length >= 4</string>
+    <string name="msg_invalid_postcode">postcode should be 8 characters</string>
+    <string name="msg_search">No Products Found</string>
+    <string name="cart_hint_price">Total \u20B9 </string>
+    <string name="cart_item">%1$s item(s)</string>
+    <string name="cart_checkout">Checkout</string>
 </resources>

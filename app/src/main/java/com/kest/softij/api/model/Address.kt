@@ -1,5 +1,6 @@
 package com.kest.softij.api.model
 
+import org.json.JSONArray
 import org.json.JSONObject
 
 data class Address(
@@ -35,7 +36,7 @@ data class Address(
     class AddressParser:Parser<MutableList<Address>>{
         override fun parseJson(json: String): Res<MutableList<Address>> {
             val jsonObj = JSONObject(json)
-            val result = jsonObj.getJSONArray("result")
+            val result:JSONArray = jsonObj.getJSONArray("result")
             val list = mutableListOf<Address>()
             val res = Res(
                 jsonObj.getString("Msg"),

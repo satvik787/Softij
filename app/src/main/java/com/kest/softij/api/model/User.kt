@@ -1,10 +1,13 @@
 package com.kest.softij.api.model
 
+import androidx.room.Entity
+import androidx.room.PrimaryKey
 import org.json.JSONObject
 import java.net.URL
 
+@Entity
 data class User
-    (val customerId:Int,
+    (@PrimaryKey val customerId:Int,
      val storeId:Int,
      var firstName:String,
      var lastName:String,
@@ -12,7 +15,7 @@ data class User
      val addressId:Int,
      var telephone:String,
      val ip:String,
-     val fax:String,
+     var newsletter:Int,
      val dateAdded:String)
 {
     class UserParser:Parser<User>{
@@ -32,7 +35,7 @@ data class User
                     result.getInt("address_id"),
                     result.getString("telephone"),
                     result.getString("ip"),
-                    result.getString("fax"),
+                    result.getInt("newsletter"),
                     result.getString("date_added")
                 )
             )

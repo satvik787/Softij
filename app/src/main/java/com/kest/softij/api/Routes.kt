@@ -9,13 +9,19 @@ class Routes {
         const val orders:String = "api.php?route=account/orders"
         const val userInfo:String = "api.php?route=account/info"
         const val address:String = "api.php?route=account/address"
+        const val search:String = "api.php?route=search"
+        const val searchCount:String = "api.php?route=list/count"
+
 
         const val postUrl:String = "api.php"
         const val postWishlist:String = "account/wishlist"
         const val postRemoveWishlist:String = "account/wishlist/remove"
         const val editAccount:String = "account/edit"
         const val insertAddress:String = "account/address"
+        const val updateSub:String = "account/update/sub"
+        const val updateViews:String = "update/views"
         const val editAddress:String = "account/address/edit"
         const val deleteAddress:String = "account/address/delete"
+
     }
 }

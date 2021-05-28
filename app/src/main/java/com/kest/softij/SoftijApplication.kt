@@ -5,6 +5,6 @@ import android.app.Application
 class SoftijApplication:Application() {
     override fun onCreate() {
         super.onCreate()
-        SoftijRepository.init()
+        SoftijRepository.init(this)
     }
 }
