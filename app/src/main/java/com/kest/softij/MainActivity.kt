@@ -1,13 +1,18 @@
 package com.kest.softij
 
+import android.content.Context
 import android.content.res.Configuration
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import android.view.KeyEvent
 import android.view.Menu
 import android.view.MenuItem
 import android.view.View
+import android.view.inputmethod.EditorInfo
+import android.view.inputmethod.InputMethodManager
 import android.widget.EditText
 import android.widget.ImageButton
+import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.ActionBarDrawerToggle
 import androidx.core.view.GravityCompat
@@ -16,6 +21,7 @@ import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import com.google.android.material.navigation.NavigationView
 import com.kest.softij.vm.MainViewModel
+import java.lang.ClassCastException
 
 class MainActivity : AppCompatActivity(),
     NavigationView.OnNavigationItemSelectedListener,
@@ -25,7 +31,7 @@ class MainActivity : AppCompatActivity(),
 
     private lateinit var actionBarDrawerToggle:ActionBarDrawerToggle
     private lateinit var drawerLayout:DrawerLayout
-
+    private lateinit var searchEditText:EditText
     private val viewModel: MainViewModel by lazy{
         ViewModelProvider(this).get(MainViewModel::class.java)
     }
@@ -34,24 +40,37 @@ class MainActivity : AppCompatActivity(),
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
+        searchEditText = findViewById(R.id.search)
         if(resources.configuration.orientation == Configuration.ORIENTATION_LANDSCAPE){
             findViewById<ImageButton>(R.id.search_btn).visibility = View.GONE
-            findViewById<EditText>(R.id.search).visibility = View.GONE
+            searchEditText.visibility = View.GONE
         }else if(resources.configuration.orientation == Configuration.ORIENTATION_PORTRAIT){
             findViewById<ImageButton>(R.id.search_btn).visibility = View.VISIBLE
-            findViewById<EditText>(R.id.search).visibility = View.VISIBLE
+            searchEditText.visibility = View.VISIBLE
         }
 
         setSupportActionBar(findViewById(R.id.toolbar))
         viewModel.title?.let {
             updateTitle()
         }
+
+        findViewById<ImageButton>(R.id.search_btn).setOnClickListener {
+            search()
+        }
+
+
+
         drawerLayout = findViewById(R.id.main_activity_drawer)
         actionBarDrawerToggle = ActionBarDrawerToggle(this,
             drawerLayout,
             R.string.desc_open_navigation_drawer,
             R.string.desc_close_navigation_drawer).apply { syncState() }
 
+        viewModel.cartStatus.observe(this,{
+            it?.let {
+                Toast.makeText(this,it,Toast.LENGTH_SHORT).show()
+            }
+        })
 
         supportFragmentManager.addOnBackStackChangedListener {
             if(supportFragmentManager.backStackEntryCount < viewModel.titleStack.size){
@@ -71,6 +90,23 @@ class MainActivity : AppCompatActivity(),
                 .add(R.id.main_activity_screen,ListFragment.init(ListFragment.LIST_PRODUCTS))
                 .commit()
         }
+    }
+
+
+    override fun onStart() {
+        super.onStart()
+        searchEditText.setOnEditorActionListener(object :TextView.OnEditorActionListener{
+            override fun onEditorAction(v: TextView?, actionId: Int, event: KeyEvent?): Boolean {
+                if(actionId == EditorInfo.IME_ACTION_GO){
+                    search()
+                    val imm = getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
+                    imm.hideSoftInputFromWindow(searchEditText.windowToken, 0);
+                    return true
+                }
+                return false
+            }
+
+        });
     }
 
     override fun onConfigurationChanged(newConfig: Configuration) {
@@ -94,8 +130,12 @@ class MainActivity : AppCompatActivity(),
         if(actionBarDrawerToggle.onOptionsItemSelected(item)){
             return true
         }else if(item.itemId == R.id.cart){
-            Toast.makeText(this,"Cart",Toast.LENGTH_SHORT).show()
-            return true
+            val fragment = supportFragmentManager.findFragmentById(R.id.main_activity_screen)
+            try {
+                val cartFragment = fragment as CartFragment
+            }catch (e:ClassCastException){
+                replaceFragment(CartFragment(),R.string.title_cart)
+            }
         }
         return super.onOptionsItemSelected(item)
 
@@ -136,7 +176,20 @@ class MainActivity : AppCompatActivity(),
             super.onBackPressed()
         }
     }
-
+    private fun search(){
+        val fragment = supportFragmentManager.findFragmentById(R.id.main_activity_screen)
+        try{
+            val listFragment = fragment as ListFragment
+            if(listFragment.listType != ListFragment.LIST_SEARCH){
+                replaceFragment(ListFragment.init(ListFragment.LIST_SEARCH),R.string.search)
+            }
+        }catch (e:ClassCastException){
+            replaceFragment(ListFragment.init(ListFragment.LIST_SEARCH),R.string.search)
+            println(e.message)
+        }
+        viewModel.search(searchEditText.text.toString(),50)
+        searchEditText.setText("")
+    }
     private fun replaceFragment(fragment: Fragment,id:Int) {
         supportFragmentManager
             .beginTransaction()
