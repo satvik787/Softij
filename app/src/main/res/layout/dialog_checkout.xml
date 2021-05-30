@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    android:orientation="vertical"
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <Button
+        android:layout_margin="10dp"
+        android:id="@+id/add_address"
+        android:backgroundTint="@color/mainColor"
+        android:text="@string/title_add_addy"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" />
+
+    <TextView
+        android:id="@+id/empty_msg"
+        android:layout_gravity="center"
+        android:textSize="16sp"
+        android:visibility="gone"
+        android:text="@string/msg_no_address"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"/>
+
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/cart_address_list"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent" />
+</LinearLayout>

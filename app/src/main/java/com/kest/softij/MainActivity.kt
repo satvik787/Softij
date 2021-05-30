@@ -1,6 +1,7 @@
 package com.kest.softij
 
 import android.content.Context
+import android.content.Intent
 import android.content.res.Configuration
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
@@ -20,18 +21,22 @@ import androidx.drawerlayout.widget.DrawerLayout
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import com.google.android.material.navigation.NavigationView
+import com.kest.softij.api.model.User
 import com.kest.softij.vm.MainViewModel
 import java.lang.ClassCastException
 
 class MainActivity : AppCompatActivity(),
     NavigationView.OnNavigationItemSelectedListener,
     ProductFragment.ToProductFragment,
-    AddressFragment.ToAddressFragment
+    AddressFragment.ToAddressFragment,
+    CartFragment.ToCartFragment
 {
 
     private lateinit var actionBarDrawerToggle:ActionBarDrawerToggle
     private lateinit var drawerLayout:DrawerLayout
     private lateinit var searchEditText:EditText
+
+
     private val viewModel: MainViewModel by lazy{
         ViewModelProvider(this).get(MainViewModel::class.java)
     }
@@ -66,11 +71,45 @@ class MainActivity : AppCompatActivity(),
             R.string.desc_open_navigation_drawer,
             R.string.desc_close_navigation_drawer).apply { syncState() }
 
+
+        viewModel.passwordLiveData.observe(this,{
+            it?.let { res ->
+                Toast.makeText(this,res.msg,Toast.LENGTH_LONG).show()
+            }
+        })
+
+        viewModel.postCartItem.observe(this,{
+            it?.let { res ->
+                if(res.code > 0 || res.numRows > 0){
+                    val repo = SoftijRepository.getRepo()
+                    repo.webCheckout(
+                        repo.getUser().email,
+                        repo.getUser().password,
+                        viewModel.addressId
+                    ).observe(this,{ response ->
+                        response?.let { r ->
+                            Toast.makeText(this,r.msg,Toast.LENGTH_LONG).show()
+                        }
+                    })
+                }
+                res.data?.let { list ->
+                    for (i in list){
+                        SoftijRepository
+                            .getRepo()
+                            .databaseDeleteCartItem(viewModel.cartItems[i])
+                    }
+                }
+                Toast.makeText(this,res.msg,Toast.LENGTH_SHORT).show()
+            }
+        })
+
         viewModel.cartStatus.observe(this,{
             it?.let {
                 Toast.makeText(this,it,Toast.LENGTH_SHORT).show()
             }
         })
+
+
 
         supportFragmentManager.addOnBackStackChangedListener {
             if(supportFragmentManager.backStackEntryCount < viewModel.titleStack.size){
@@ -83,18 +122,29 @@ class MainActivity : AppCompatActivity(),
 
         findViewById<NavigationView>(R.id.navigation_drawer).setNavigationItemSelectedListener(this)
 
-        val fragment:Fragment? = supportFragmentManager.findFragmentById(R.id.main_activity_screen)
-        if(fragment == null){
-            supportFragmentManager
-                .beginTransaction()
-                .add(R.id.main_activity_screen,ListFragment.init(ListFragment.LIST_PRODUCTS))
-                .commit()
-        }
+        SoftijRepository.getRepo().databaseGetUser().observe(this,{
+            if(it == null){
+                val intent = Intent(this,RegisterActivity::class.java)
+                startActivityForResult(intent,RegisterActivity.REQUEST_NEW_USER)
+            }else {
+                SoftijRepository.getRepo().setUser(it)
+                val fragment:Fragment? = supportFragmentManager.findFragmentById(R.id.main_activity_screen)
+                if(fragment == null){
+                    supportFragmentManager
+                        .beginTransaction()
+                        .add(R.id.main_activity_screen,ListFragment.init(ListFragment.LIST_PRODUCTS))
+                        .commit()
+                }
+            }
+        })
+
     }
 
 
     override fun onStart() {
         super.onStart()
+
+
         searchEditText.setOnEditorActionListener(object :TextView.OnEditorActionListener{
             override fun onEditorAction(v: TextView?, actionId: Int, event: KeyEvent?): Boolean {
                 if(actionId == EditorInfo.IME_ACTION_GO){
@@ -107,6 +157,29 @@ class MainActivity : AppCompatActivity(),
             }
 
         });
+    }
+
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        super.onActivityResult(requestCode, resultCode, data)
+        if(requestCode == RegisterActivity.REQUEST_NEW_USER){
+            if(resultCode == RESULT_OK){
+                val user = data?.getSerializableExtra(RegisterActivity.RESPONSE_KEY) as User
+                SoftijRepository.getRepo().setUser(user)
+                SoftijRepository.getRepo().databasePutUser(user)
+                val fragment:Fragment? = supportFragmentManager.findFragmentById(R.id.main_activity_screen)
+                if(fragment == null){
+                    supportFragmentManager
+                        .beginTransaction()
+                        .add(R.id.main_activity_screen,ListFragment.init(ListFragment.LIST_PRODUCTS))
+                        .commit()
+                }
+            }else if(resultCode == RegisterActivity.RESULT_EXIT){
+                finish()
+            } else if(resultCode == RESULT_CANCELED){
+                val intent = Intent(this,RegisterActivity::class.java)
+                startActivityForResult(intent,RegisterActivity.REQUEST_NEW_USER)
+            }
+        }
     }
 
     override fun onConfigurationChanged(newConfig: Configuration) {
@@ -149,20 +222,34 @@ class MainActivity : AppCompatActivity(),
                 }
             }
             R.id.my_wishlist -> {
-                replaceFragment(
-                    ListFragment.init(ListFragment.LIST_WISHLIST),
-                    R.string.title_my_wishlist)
+                val onScreen = supportFragmentManager.findFragmentById(R.id.main_activity_screen)
+                try{
+                    val listFragment = onScreen as ListFragment
+                    if(listFragment.listType != ListFragment.LIST_WISHLIST){
+                        replaceFragment(ListFragment.init(ListFragment.LIST_WISHLIST), R.string.title_my_wishlist)
+                    }
+                }catch (e:ClassCastException){
+                    replaceFragment(ListFragment.init(ListFragment.LIST_WISHLIST), R.string.title_my_wishlist)
+                }
             }
             R.id.my_order -> {
-                replaceFragment(
-                    ListFragment.init(ListFragment.LIST_ORDERS),
-                    R.string.title_my_order
-                )
+                val onScreen = supportFragmentManager.findFragmentById(R.id.main_activity_screen)
+                try{
+                    val listFragment = onScreen as ListFragment
+                    if(listFragment.listType != ListFragment.LIST_ORDERS){
+                        replaceFragment(ListFragment.init(ListFragment.LIST_ORDERS), R.string.title_my_order)
+                    }
+                }catch (e:ClassCastException){
+                    replaceFragment(ListFragment.init(ListFragment.LIST_ORDERS), R.string.title_my_order)
+                }
             }
             R.id.my_account -> {
-                replaceFragment(
-                    AccountFragment(),R.string.title_my_acc
-                )
+                val onScreen = supportFragmentManager.findFragmentById(R.id.main_activity_screen)
+                try{
+                     onScreen as AccountFragment
+                }catch (e:ClassCastException){
+                    replaceFragment(AccountFragment(),R.string.title_my_acc)
+                }
             }
         }
         drawerLayout.closeDrawer(GravityCompat.START)
@@ -204,11 +291,30 @@ class MainActivity : AppCompatActivity(),
     }
 
     override fun launchProduct(productFragment: ProductFragment) {
-        replaceFragment(productFragment,R.string.title_product)
+        val onScreen = supportFragmentManager.findFragmentById(R.id.main_activity_screen)
+        try{
+            onScreen as ProductFragment
+        }catch (e:ClassCastException){
+            replaceFragment(productFragment,R.string.title_product)
+        }
     }
 
     override fun launchAddress() {
-        replaceFragment(AddressFragment(),R.string.btn_address)
+        val onScreen = supportFragmentManager.findFragmentById(R.id.main_activity_screen)
+        try{
+            onScreen as AddressFragment
+        }catch (e:ClassCastException) {
+            replaceFragment(AddressFragment(), R.string.btn_address)
+        }
+    }
+
+    override fun launchCart() {
+        val fragment = supportFragmentManager.findFragmentById(R.id.main_activity_screen)
+        try {
+            fragment as CartFragment
+        }catch (e:ClassCastException){
+            replaceFragment(CartFragment(),R.string.title_cart)
+        }
     }
 
 

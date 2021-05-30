@@ -15,8 +15,9 @@ class AccountViewModel : ViewModel() {
 
     fun updateUserInfo(){
         SoftijRepository.getRepo().postEditAccount(updateUser,updateStatus)
-
     }
+
+
 
     fun updateLocal(user:User){
         SoftijRepository.getRepo().databaseUpdateUser(user)

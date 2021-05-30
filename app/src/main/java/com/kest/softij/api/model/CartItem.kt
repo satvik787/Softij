@@ -14,5 +14,6 @@ data class CartItem(
     val price:Double,
     var stock:Int,
     var quantity:Int = 1,
+    var addressId:Int = 0,
     @PrimaryKey(autoGenerate = true) val cartId:Int = 0
 )

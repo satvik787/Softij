@@ -22,6 +22,10 @@ interface Api {
     @GET(Routes.userInfo)
     fun getUserInfo(@Query("customerId") id: Int):Call<String>
 
+    @GET(Routes.userId)
+    fun getUserId(@Query("email") email:String):Call<String>
+
+
     @GET(Routes.address)
     fun getAddress(@Query("customerId") id: Int):Call<String>
 
@@ -49,6 +53,15 @@ interface Api {
         @Field("customerId") customerId:Int,
         @Field("productId") productId:Int,
         @Field("route") route:String = Routes.postRemoveWishlist):Call<String>
+
+    @POST(Routes.postUrl)
+    @Headers("Content-Type:application/x-www-form-urlencoded")
+    @FormUrlEncoded
+    fun checkout(
+        @Field("customerId") customerId:Int,
+        @Field("productId") productId:Int,
+        @Field("quantity") quantity:Int,
+        @Field("route") route:String = Routes.checkout):Call<String>
 
     @POST(Routes.postUrl)
     @Headers("Content-Type:application/x-www-form-urlencoded")
@@ -109,5 +122,48 @@ interface Api {
         @Field("postcode") postCode:String,
         @Field("zoneId") zoneId:Int = 4231,
         @Field("route") route:String = Routes.insertAddress):Call<String>
+
+
+
+
+    @POST(Routes.register)
+    @Headers("Content-Type:application/x-www-form-urlencoded")
+    @FormUrlEncoded
+    fun webRegister(
+        @Field("firstname") firstname:String,
+        @Field("lastname") lastname:String,
+        @Field("email") email:String,
+        @Field("phone") phone:String,
+        @Field("password") password:String):Call<String>
+
+    @POST(Routes.login)
+    @Headers("Content-Type:application/x-www-form-urlencoded")
+    @FormUrlEncoded
+    fun webLogin(
+        @Field("email") email: String,
+        @Field("password") password: String):Call<String>
+
+    @POST(Routes.forgotPassword)
+    @Headers("Content-Type:application/x-www-form-urlencoded")
+    @FormUrlEncoded
+    fun forgotPassword(
+        @Field("email") email: String):Call<String>
+
+    @POST(Routes.changePassword)
+    @Headers("Content-Type:application/x-www-form-urlencoded")
+    @FormUrlEncoded
+    fun webChangePassword(
+        @Field("email") email: String,
+        @Field("password") password: String,
+        @Field("newPassword") newPassword: String):Call<String>
+
+    @POST(Routes.webCheckout)
+    @Headers("Content-Type:application/x-www-form-urlencoded")
+    @FormUrlEncoded
+    fun webCheckout(
+        @Field("email") email: String,
+        @Field("password") password: String,
+        @Field("addressId") addressId: Int):Call<String>
+
 
 }

@@ -23,6 +23,8 @@ interface SoftijDao {
     @Update
     fun updateCartItem(items:MutableList<CartItem>)
 
+
+
     @Query("SELECT * FROM User")
     fun getUser():LiveData<User>
 

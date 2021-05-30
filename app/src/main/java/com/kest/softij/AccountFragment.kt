@@ -15,6 +15,7 @@ import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import com.google.android.material.bottomsheet.BottomSheetDialog
 import com.kest.softij.vm.AccountViewModel
+import com.kest.softij.vm.MainViewModel
 
 
 class AccountFragment : Fragment() {
@@ -22,6 +23,7 @@ class AccountFragment : Fragment() {
     private lateinit var editDialog: Dialog
     private lateinit var passwordDialog:Dialog
     private lateinit var toAddress:AddressFragment.ToAddressFragment
+    private lateinit var activityViewModel: MainViewModel
 
     private lateinit var layout:View
     private val viewModel: AccountViewModel by lazy {
@@ -45,7 +47,7 @@ class AccountFragment : Fragment() {
 
     override fun onActivityCreated(savedInstanceState: Bundle?) {
         super.onActivityCreated(savedInstanceState)
-
+        activityViewModel = ViewModelProvider(activity!!).get(MainViewModel::class.java)
         val editLayout = activity?.layoutInflater?.inflate(R.layout.dialog_edit_user, null)
         val passwordLayout = activity?.layoutInflater?.inflate(R.layout.dialog_change_password,null)
 
@@ -115,12 +117,28 @@ class AccountFragment : Fragment() {
     }
 
     private fun initPasswordLayout(layout:View?):View{
-        val password = layout?.findViewById<EditText>(R.id.acc_first_name)
-        val passwordCnf = layout?.findViewById<EditText>(R.id.acc_last_name)
+        val password = layout?.findViewById<EditText>(R.id.old_password)
+        val newPassword = layout?.findViewById<EditText>(R.id.cng_password)
+        val passwordCnf = layout?.findViewById<EditText>(R.id.cng_password_cnf)
         layout?.findViewById<Button>(R.id.cng_save)?.setOnClickListener {
-            passwordDialog.dismiss()
+            if(validatePassword(newPassword!!,passwordCnf!!)){
+                activityViewModel.changePassword(password?.text.toString(),newPassword.text.toString())
+                passwordDialog.dismiss()
+            }
         }
         return layout!!
+    }
+
+    private fun validatePassword(password:EditText,confirmPassword:EditText) : Boolean {
+        if(password.text.length in 4..20){
+            if (password.text.toString() == confirmPassword.text.toString()){
+                return true
+            }
+            confirmPassword.error = "Passwords do not match"
+            return false
+        }
+        password.error = "password length should be in between 4 and 20"
+        return false
     }
 
     private fun initEditLayout(view:View?):View{

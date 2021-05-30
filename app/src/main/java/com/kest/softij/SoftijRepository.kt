@@ -1,7 +1,6 @@
 package com.kest.softij
 
 import android.content.Context
-import android.widget.Toast
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.room.Room
@@ -9,20 +8,28 @@ import com.kest.softij.api.Api
 import com.kest.softij.api.Routes
 import com.kest.softij.api.SoftijDatabase
 import com.kest.softij.api.model.*
+import okhttp3.OkHttpClient
 import org.json.JSONObject
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
 import retrofit2.Retrofit
 import retrofit2.converter.scalars.ScalarsConverterFactory
-import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
+import java.util.concurrent.TimeUnit
 import java.util.regex.Matcher
 import java.util.regex.Pattern
 
-class SoftijRepository private constructor(context: Context):Parser<Unit>{
+
+class SoftijRepository private constructor(context: Context){
+    private val okHttpClient = OkHttpClient.Builder()
+        .connectTimeout(1, TimeUnit.MINUTES)
+        .readTimeout(60, TimeUnit.SECONDS)
+        .writeTimeout(15, TimeUnit.SECONDS)
+        .build()
     private val retrofit = Retrofit
         .Builder()
+        .client(okHttpClient)
         .addConverterFactory(ScalarsConverterFactory.create())
         .baseUrl(Routes.baseURL)
         .build()
@@ -34,8 +41,32 @@ class SoftijRepository private constructor(context: Context):Parser<Unit>{
         DATABASE_NAME
     ).build()
 
+    private val apiParser = object :Parser<Unit>{
+        override fun parseJson(json: String): Res<Unit> {
+            val jsonObj = JSONObject(json)
+            return Res(
+                jsonObj.getString("Msg"),
+                jsonObj.getInt("code"),
+                jsonObj.getInt("numRows")
+            )
+        }
+    }
+
+    private val webParser = object :Parser<Unit>{
+        override fun parseJson(json: String): Res<Unit> {
+            val jsonObj = JSONObject(json)
+            return Res(
+                jsonObj.getString("Msg"),
+                if(jsonObj.getBoolean("status")) 1 else 0,
+                0
+            )
+        }
+
+    }
+
     private val threadPool = Executors.newFixedThreadPool(2)
-    private val customerId = 31
+    private lateinit var user:User
+
 
     companion object{
         private var obj:SoftijRepository? = null
@@ -56,6 +87,13 @@ class SoftijRepository private constructor(context: Context):Parser<Unit>{
             return matcher.find()
         }
     }
+
+    fun setUser(user: User){
+        this.user = user
+    }
+
+    fun getUser() = user
+
 
     fun databaseGetCartItems():LiveData<MutableList<CartItem>>{
         return database.softijDao().getCartItems()
@@ -102,27 +140,52 @@ class SoftijRepository private constructor(context: Context):Parser<Unit>{
     }
 
     fun getWishList():LiveData<Res<MutableList<Product>>>{
-        val call: Call<String> = api.getWishlist(customerId)
+        val call: Call<String> = api.getWishlist(user.customerId)
         return executeCall(call,Product.ProductParser())
     }
 
     fun inWishlist(productId:Int):LiveData<Res<Unit>>{
-        val call = api.inWishlist(customerId,productId)
-        return executeCall(call,this)
+        val call = api.inWishlist(user.customerId,productId)
+        return executeCall(call,apiParser)
+    }
+
+    fun postCheckout(items:MutableList<CartItem>,livedata: MutableLiveData<Res<MutableList<Int>>>){
+        threadPool.execute {
+            val list = mutableListOf<Int>()
+            for (i in 0 until items.size){
+                val call = api.checkout(user.customerId,items[i].productId,items[i].quantity)
+                val body = call.execute().body()
+                body?.let{
+                    val json = apiParser.parseJson(it)
+                    if(json.code > 0) list.add(i)
+                }
+            }
+            if(list.size == items.size) {
+               livedata.postValue(Res("Order Placed successfully",1,0,list))
+            }else{
+                livedata.postValue(Res("unsuccessful",-1,list.size,list))
+            }
+
+        }
     }
 
     fun getOrders():LiveData<Res<MutableList<Order>>>{
-        val orderCall: Call<String> = api.getOrders(customerId)
+        val orderCall: Call<String> = api.getOrders(user.customerId)
         return executeCall(orderCall,Order.OrderParser())
     }
 
     fun getUserInfo():LiveData<Res<User>>{
-        val infoCall = api.getUserInfo(customerId)
+        val infoCall = api.getUserInfo(user.customerId)
         return executeCall(infoCall,User.UserParser())
     }
 
+    fun getUserId(email: String):LiveData<Res<User>>{
+        val call = api.getUserId(email)
+        return executeCall(call,User.UserParser())
+    }
+
     fun getAddress():LiveData<Res<MutableList<Address>>>{
-        val addressCall = api.getAddress(customerId)
+        val addressCall = api.getAddress(user.customerId)
         return executeCall(addressCall,Address.AddressParser())
     }
     fun getListCount(query: String,livedata: MutableLiveData<Int>) {
@@ -170,18 +233,18 @@ class SoftijRepository private constructor(context: Context):Parser<Unit>{
     }
 
     fun postWishList(productId:Int,mutableLiveData: MutableLiveData<Res<Unit>>){
-        val postWishlistCall = api.postWishlist(customerId,productId)
-        executeCall(postWishlistCall,this,mutableLiveData)
+        val postWishlistCall = api.postWishlist(user.customerId,productId)
+        executeCall(postWishlistCall,apiParser,mutableLiveData)
     }
 
     fun postUpdateSub(mutableLiveData: MutableLiveData<Res<Unit>>){
-        val postUpdateCall = api.postUpdateSub(customerId)
-        executeCall(postUpdateCall,this,mutableLiveData)
+        val postUpdateCall = api.postUpdateSub(user.customerId)
+        executeCall(postUpdateCall,apiParser,mutableLiveData)
     }
 
     fun postUpdateViews(productId: Int,mutableLiveData: MutableLiveData<Res<Unit>>){
         val call = api.postUpdateView(productId)
-        executeCall(call,this,mutableLiveData)
+        executeCall(call,apiParser,mutableLiveData)
     }
 
     fun postEditAddress(address: Address,mutableLiveData: MutableLiveData<Res<Unit>>){
@@ -194,7 +257,7 @@ class SoftijRepository private constructor(context: Context):Parser<Unit>{
             address.city,
             address.postCode,
         )
-        executeCall(editAddressCall,this,mutableLiveData)
+        executeCall(editAddressCall,apiParser,mutableLiveData)
     }
 
     fun postEditAccount(user:User,mutableLiveData: MutableLiveData<Res<Unit>>){
@@ -205,22 +268,22 @@ class SoftijRepository private constructor(context: Context):Parser<Unit>{
             user.email,
             user.telephone
         )
-        executeCall(editAccCall,this,mutableLiveData)
+        executeCall(editAccCall,apiParser,mutableLiveData)
     }
 
     fun postRemoveWishlist(productId: Int,liveData: MutableLiveData<Res<Unit>>){
-        val removeCall = api.postRemoveWishlist(customerId,productId)
-        executeCall(removeCall,this,liveData)
+        val removeCall = api.postRemoveWishlist(user.customerId,productId)
+        executeCall(removeCall,apiParser,liveData)
     }
 
     fun postDeleteAddress(addressId:Int,liveData: MutableLiveData<Res<Unit>>){
         val deleteCall = api.postDeleteAddress(addressId)
-        executeCall(deleteCall,this,liveData)
+        executeCall(deleteCall,apiParser,liveData)
     }
 
     fun postInsertAddress(address: Address,mutableLiveData: MutableLiveData<Res<Unit>>){
         val insertAddressCall  = api.postInsertAddress(
-            customerId,
+            user.customerId,
             address.address1,
             address.address2,
             address.firstname,
@@ -228,10 +291,10 @@ class SoftijRepository private constructor(context: Context):Parser<Unit>{
             address.city,
             address.postCode,
         )
-        executeCall(insertAddressCall,this,mutableLiveData)
+        executeCall(insertAddressCall,apiParser,mutableLiveData)
     }
 
-    private fun <T> executeCall(call:Call<String>,parser: Parser<T>,liveData: MutableLiveData<Res<T>>? = null,append:Boolean = false):MutableLiveData<Res<T>>{
+    private fun <T> executeCall(call:Call<String>,parser: Parser<T>,liveData: MutableLiveData<Res<T>>? = null):MutableLiveData<Res<T>>{
         val mutableLiveData = liveData ?: MutableLiveData<Res<T>>()
         call.enqueue(object:Callback<String>{
             override fun onResponse(p0: Call<String>, p1: Response<String>) {
@@ -257,14 +320,39 @@ class SoftijRepository private constructor(context: Context):Parser<Unit>{
     }
 
 
+    fun login(email: String,password:String,liveData: MutableLiveData<Res<Unit>>){
+        val call = api.webLogin(email,password)
+        executeCall(call,webParser,liveData)
+    }
 
-    override fun parseJson(json: String): Res<Unit> {
-        val jsonObj = JSONObject(json)
-        return Res(
-            jsonObj.getString("Msg"),
-            jsonObj.getInt("code"),
-            jsonObj.getInt("numRows")
+    fun register(firstName:String,
+                 lastName:String,
+                 password: String,
+                 email: String,
+                 telephone:String,liveData: MutableLiveData<Res<Unit>>){
+        val call = api.webRegister(
+            firstName,
+            lastName,
+            email,
+            telephone,
+            password
         )
+        executeCall(call,webParser,liveData)
+    }
+
+    fun forgotPassword(email: String,liveData: MutableLiveData<Res<Unit>>){
+        val call = api.forgotPassword(email)
+        executeCall(call,webParser,liveData)
+    }
+
+    fun webChangePassword(email: String,password: String,newPassword:String,liveData: MutableLiveData<Res<Unit>>){
+        val call = api.webChangePassword(email,password,newPassword)
+        executeCall(call,webParser,liveData)
+    }
+
+    fun webCheckout(email: String,password: String,addressId: Int):LiveData<Res<Unit>>{
+        val call = api.webCheckout(email,password,addressId)
+        return executeCall(call,webParser)
     }
 
 }

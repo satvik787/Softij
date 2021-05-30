@@ -3,6 +3,7 @@ package com.kest.softij.api.model
 import androidx.room.Entity
 import androidx.room.PrimaryKey
 import org.json.JSONObject
+import java.io.Serializable
 import java.net.URL
 
 @Entity
@@ -16,7 +17,8 @@ data class User
      var telephone:String,
      val ip:String,
      var newsletter:Int,
-     val dateAdded:String)
+     val dateAdded:String,
+     var password:String = ""):Serializable
 {
     class UserParser:Parser<User>{
         override fun parseJson(json:String):Res<User>{

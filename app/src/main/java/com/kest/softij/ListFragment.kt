@@ -29,6 +29,7 @@ class ListFragment: Fragment(),ProductFragment.WishlistState {
     private val viewModel: ListViewModel by lazy{
         ViewModelProvider(this).get(ListViewModel::class.java)
     }
+    private lateinit var toCart: CartFragment.ToCartFragment
     private lateinit var toFragment:ProductFragment.ToProductFragment
     private lateinit var progressBar:ProgressBar
     private lateinit var emptyMsg:TextView
@@ -52,6 +53,7 @@ class ListFragment: Fragment(),ProductFragment.WishlistState {
     override fun onAttach(context: Context) {
         super.onAttach(context)
         toFragment = context as ProductFragment.ToProductFragment
+        toCart = context as CartFragment.ToCartFragment
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -196,6 +198,10 @@ class ListFragment: Fragment(),ProductFragment.WishlistState {
                     onRemove(adapterPosition)
                     viewModel.postRemoveWishlist(product.productId)
                 }
+            }
+            buyBtn.setOnClickListener {
+                viewModel.addToCart(product,activityViewModel.cartStatus)
+                toCart.launchCart()
             }
             view.findViewById<LinearLayout>(R.id.info_box).setOnClickListener(this)
         }

@@ -35,8 +35,9 @@
     <string name="btn_save">Save</string>
     <string name="title_edit">Edit Profile</string>
     <string name="desc_acc_password">Password</string>
+    <string name="desc_acc_new_password">New Password</string>
     <string name="desc_acc_password_confirm">Confirm Password</string>
-    <string name="title_cng_password">Change Password</string>
+    <string name="title_cng_password">New Password</string>
     <string name="msg_loading">Loading…</string>
     <string name="desc_address_add">Add Address</string>
     <string name="desc_address1">Address 1</string>
@@ -59,4 +60,21 @@
     <string name="cart_hint_price">Total \u20B9 </string>
     <string name="cart_item">%1$s item(s)</string>
     <string name="cart_checkout">Checkout</string>
+    <string name="msg_no_address">No saved Addresses</string>
+    <string name="payment">Payment Method : COD</string>
+
+    <string name="register">Register</string>
+    <string name="first_name">First name</string>
+    <string name="last_name">Last name</string>
+    <string name="email">E-mail</string>
+    <string name="telephone">Telephone</string>
+    <string name="password">Password</string>
+    <string name="confirm_password">Confirm password</string>
+    <string name="newsletter">Newsletter</string>
+    <string name="already_have_an_account">Already have an account?</string>
+    <string name="login">Login</string>
+    <string name="forgot_password">Forgot password?</string>
+    <string name="do_not_have_an_account">Dont Have an account?</string>
+    <string name="submit">Submit</string>
+
 </resources>
